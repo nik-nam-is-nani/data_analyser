@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            padding-top: 80px;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 999;
+        }
+
+        .navbar-left a, .navbar-right a {
+            margin: 0 15px;
+            text-decoration: none;
+            color: #34495e;
+            font-weight: 700;
+            transition: color 0.3s;
+        }
+
+        .navbar a:hover {
+            color: #3498db;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 80px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+
+        .form-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-section label {
+            font-weight: 600;
+            color: #34495e;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .form-section input, .form-section select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-section button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-section button:hover {
+            background: #2980b9;
+        }
+
+        .result-section {
+            margin-top: 30px;
+        }
+
+        .result-section h2 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .result-table th, .result-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .result-table th {
+            background: #3498db;
+            color: white;
+        }
+    .navbar-left a, .navbar-right a {
+      margin: 0 15px; text-decoration: none; color: #34495e;
+      font-weight: 700; transition: color 0.3s;
+    }
+        .tip {
+            margin-top: 20px;
+            font-style: italic;
+            color: #2c3e50;
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #2ecc71;
+        }
+            .profile-dropdown {
+      display: none; position: absolute; right: 0; background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      border-radius: 10px; margin-top: 10px; z-index: 1000; min-width: 120px;
+    }
+    .profile-dropdown a {
+      display: block; padding: 10px 15px; text-decoration: none; color: #34495e;
+    }
+    .profile-dropdown a:hover { background: #f0f0f0; }
+    .main-container {
+      display: flex; justify-content: space-between; padding: 20px; flex: 1;
+    }
+
+        .chart-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-left">
+            <a href="mainpage.html">Dashboard</a>
+            <a href="week_db.html">Weekly Data Analyzer</a>
+            <a href="expense_manager.html">Expense Manager</a>
+        </div>
+        <a href="login.html" id="loginLink">Login</a>
+        <a href="signup.html" id="signupLink">Signup</a>
+        <div class="profile-icon" id="profileIcon" style="display: none;" onclick="toggleDropdown()">
+            👤
+            <div class="profile-dropdown" id="profileDropdown">
+                <a href="#" onclick="toggleDarkMode()">🌗 Toggle Dark Mode</a>
+                <a href="#">Settings</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Expense Manager</h1>
+        </div>
+
+        <div class="form-section">
+            <label for="totalAmount">Enter Total Amount (₹):</label>
+            <input type="number" id="totalAmount" placeholder="Enter amount" />
+
+            <label for="categorySelect">Choose a Category:</label>
+            <select id="categorySelect">
+                <option value="Housewife">Housewife 🏠</option>
+                <option value="College Student">College Student 🎓</option>
+                <option value="Businessman">Businessman 💼</option>
+                <option value="Employee">Employee 👨‍💼</option>
+                <option value="Freelancer">Freelancer 🖥️</option>
+                <option value="Retired Person">Retired Person 👵</option>
+                <option value="Other">Other ➕</option>
+            </select>
+
+            <button onclick="calculateAllocations()">Calculate Allocations</button>
+        </div>
+
+        <div class="result-section" id="resultSection" style="display: none;">
+            <h2>Suggested Allocations:</h2>
+            
+            <div class="results-grid">
+                <div>
+                    <table class="result-table" id="resultTable">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Percentage (%)</th>
+                                <th>Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultBody"></tbody>
+                    </table>
+                    <div class="tip" id="moneyTip"></div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+     
+            function toggleDropdown() {
+        const dropdown = document.getElementById("profileDropdown");
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    }
+        let pieChart = null;
+
+        function calculateAllocations() {
+            const totalAmount = parseFloat(document.getElementById('totalAmount').value);
+            const category = document.getElementById('categorySelect').value;
+            const resultBody = document.getElementById('resultBody');
+            const moneyTip = document.getElementById('moneyTip');
+            const resultSection = document.getElementById('resultSection');
+            let allocations = [];
+            let tip = '';
+
+            if (isNaN(totalAmount) || totalAmount <= 0) {
+                alert('Please enter a valid amount.');
+                return;
+            }
+
+            switch (category) {
+                case 'Housewife':
+                    allocations = [
+                        { name: 'Groceries', percentage: 40, amount: (totalAmount * 0.4).toFixed(2) },
+                        { name: 'Household Bills', percentage: 25, amount: (totalAmount * 0.25).toFixed(2) },
+                        { name: 'Savings', percentage: 15, amount: (totalAmount * 0.15).toFixed(2) },
+                        { name: 'Health', percentage: 10, amount: (totalAmount * 0.1).toFixed(2) },
+                        { name: 'Miscellaneous', percentage: 10, amount: (totalAmount * 0.1).toFixed(2) }
+                    ];
+                    tip = 'Consider using a shopping list to manage your grocery expenses better.';
+                    break;
+                case 'College Student':
+                    allocations = [
+                        { name: 'Food', percentage: 35, amount: (totalAmount * 0.35).toFixed(2) },
+                        { name: 'Education', percentage: 25, amount: (totalAmount * 0.25).toFixed(2) },
+                        { name: 'Transport', percentage: 15, amount: (totalAmount * 0.15).toFixed(2) },
+                        { name: 'Entertainment', percentage: 15, amount: (totalAmount * 0.15).toFixed(2) },
+                        { name: 'Savings', percentage: 10, amount: (totalAmount * 0.1).toFixed(2) }
+                    ];
+                    tip = 'Try to limit entertainment expenses to save more for education.';
+                    break;
+                case 'Businessman':
+                    allocations = [
+                        { name: 'Investments', percentage: 40, amount: (totalAmount * 0.4).toFixed(2) },
+                        { name: 'Business Expenses', percentage: 25, amount: (totalAmount * 0.25).toFixed(2) },
+                        { name: 'Savings', percentage: 20, amount: (totalAmount * 0.2).toFixed(2) },
+                        { name: 'Family', percentage: 10, amount: (totalAmount * 0.1).toFixed(2) },
+                        { name: 'Emergency Fund', percentage: 5, amount: (totalAmount * 0.05).toFixed(2) }
+                    ];
+                    tip = 'Always keep a portion for unexpected business expenses.';
+                    break;
+                case 'Employee':
+                    allocations = [
+                        { name: 'Rent/Mortgage', percentage: 30, amount: (totalAmount * 0.3).toFixed(2) },
+                        { name: 'Food', percentage: 20, amount: (totalAmount * 0.2).toFixed(2) },
+                        { name: 'Transport', percentage: 15, amount: (totalAmount * 0.15).toFixed(2) },
+                        { name: 'Savings', percentage: 20, amount: (totalAmount * 0.2).toFixed(2) },
+                        { name: 'Entertainment', percentage: 15, amount: (totalAmount * 0.15).toFixed(2) }
+                    ];
+                    tip = 'Automate your savings to ensure consistent financial growth.';
+                    break;
+                case 'Freelancer':
+                    allocations = [
+                        { name: 'Business Expenses', percentage: 30, amount: (totalAmount * 0.3).toFixed(2) },
+                        { name: 'Taxes', percentage: 20, amount: (totalAmount * 0.2).toFixed(2) },
+                        { name: 'Savings', percentage: 25, amount: (totalAmount * 0.25).toFixed(2) },
+                        { name: 'Personal', percentage: 15, amount: (totalAmount * 0.15).toFixed(2) },
+                        { name: 'Emergency Fund', percentage: 10, amount: (totalAmount * 0.1).toFixed(2) }
+                    ];
+                    tip = 'Set aside taxes quarterly to avoid year-end surprises.';
+                    break;
+                case 'Retired Person':
+                    allocations = [
+                        { name: 'Healthcare', percentage: 35, amount: (totalAmount * 0.35).toFixed(2) },
+                        { name: 'Daily Living', percentage: 25, amount: (totalAmount * 0.25).toFixed(2) },
+                        { name: 'Leisure', percentage: 20, amount: (totalAmount * 0.2).toFixed(2) },
+                        { name: 'Savings', percentage: 15, amount: (totalAmount * 0.15).toFixed(2) },
+                        { name: 'Gifts/Donations', percentage: 5, amount: (totalAmount * 0.05).toFixed(2) }
+                    ];
+                    tip = 'Prioritize healthcare expenses while enjoying your retirement.';
+                    break;
+                case 'Other':
+                    allocations = [
+                        { name: 'Needs', percentage: 50, amount: (totalAmount * 0.5).toFixed(2) },
+                        { name: 'Wants', percentage: 30, amount: (totalAmount * 0.3).toFixed(2) },
+                        { name: 'Savings', percentage: 20, amount: (totalAmount * 0.2).toFixed(2) }
+                    ];
+                    tip = 'Follow the 50/30/20 rule for balanced financial management.';
+                    break;
+            }
+
+            // Clear previous results
+            resultBody.innerHTML = '';
+            
+            // Populate the table
+            allocations.forEach(allocation => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${allocation.name}</td>
+                    <td>${allocation.percentage}%</td>
+                    <td>₹${allocation.amount}</td>
+                `;
+                resultBody.appendChild(row);
+            });
+
+            // Show money management tip
+            moneyTip.textContent = tip;
+
+            // Create pie chart
+            createPieChart(allocations, totalAmount);
+
+            // Show results
+            resultSection.style.display = 'block';
+        }
+
+        function createPieChart(allocations, totalAmount) {
+            const ctx = document.getElementById('pieChart').getContext('2d');
+
+            // Destroy old chart
+            if (pieChart) {
+                pieChart.destroy();
+            }
+
+            pieChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: allocations.map(item => item.name),
+                    datasets: [{
+                        data: allocations.map(item => item.percentage),
+                        backgroundColor: [
+                            '#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#9966FF',
+                            '#FF9F40', '#C9CBCF', '#4BC0C0'
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const percent = context.raw || 0;
+                                    const amount = ((percent / 100) * totalAmount).toFixed(2);
+                                    return `${label}: ${percent}% (₹${amount})`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }      
+         function logout() {
+        localStorage.removeItem("user");
+        window.location.href = "login.html";
+    }
+            function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+// Run when the page loads
+window.onload = function() {
+    const user = localStorage.getItem("user");
+    const loginLink = document.getElementById("loginLink");
+    const signupLink = document.getElementById("signupLink");
+    const profileIcon = document.getElementById("profileIcon");
+
+    if (user) {
+        // User is logged in → hide login/signup, show profile icon
+        loginLink.style.display = "none";
+        signupLink.style.display = "none";
+        profileIcon.style.display = "block";
+    } else {
+        // User is not logged in → show login/signup, hide profile icon
+        loginLink.style.display = "inline-block";
+        signupLink.style.display = "inline-block";
+        profileIcon.style.display = "none";
+    }
+};
+
+    </script>
+</body>
+</html>

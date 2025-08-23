@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weekly Data Analyzer</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Roboto", sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 350px !important;
+    }
+
+    .data-table {
+      margin-top: 20px;
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th, .data-table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .data-table th {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .data-table tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+
+    .footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📊 Weekly Spending Analyzer</h1>
+
+  <div class="container">
+    <!-- Pie Chart -->
+    <div class="card">
+      <h2 style="text-align:center;">Category Wise Spending</h2>
+      <canvas id="pieChart"></canvas>
+    </div>
+
+    <!-- Bar Chart -->
+    <div class="card">
+      <h2 style="text-align:center;">Weekly Spending</h2>
+      <canvas id="barChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="card" style="max-width:800px;margin:30px auto;">
+    <h2 style="text-align:center;">Spending Data</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Week</th>
+          <th>Amount Spent</th>
+        </tr>
+      </thead>
+      <tbody id="dataBody">
+        <!-- Fetched data will go here -->
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    © 2025 Weekly Data Analyzer | Made with ❤️
+  </div>
+
+  <script>
+    let barChart, pieChart;
+
+    // 🔹 Fetch data from Flask backend
+    async function fetchExpenseData() {
+      try {
+        // Example: replace user_id=1 with actual logged-in user id
+        const response = await fetch("http://127.0.0.1:5000/api/weekly_expenses/1");
+        const data = await response.json();
+
+        // Example response format:
+        // { weeks: [{week:"Week 1", amount:100}, {week:"Week 2", amount:200}], categories: [{category:"Food", amount:120}, ...] }
+
+        const weeklyData = data.weeks;
+        const categoryData = data.categories;
+
+        // --- Populate Table ---
+        const dataBody = document.getElementById("dataBody");
+        dataBody.innerHTML = "";
+        weeklyData.forEach(d => {
+          const row = `<tr><td>${d.week}</td><td>$${d.amount}</td></tr>`;
+          dataBody.innerHTML += row;
+        });
+
+        // --- Destroy old charts before re-render ---
+        if (barChart) barChart.destroy();
+        if (pieChart) pieChart.destroy();
+
+        // --- Pie Chart ---
+        const pieCtx = document.getElementById('pieChart').getContext('2d');
+        pieChart = new Chart(pieCtx, {
+          type: 'pie',
+          data: {
+            labels: categoryData.map(c => c.category),
+            datasets: [{
+              data: categoryData.map(c => c.amount),
+              backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4CAF50", "#9966FF"]
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'bottom' },
+              title: { display: true, text: "Expenses by Category" }
+            }
+          }
+        });
+
+        // --- Bar Chart ---
+        const barCtx = document.getElementById('barChart').getContext('2d');
+        barChart = new Chart(barCtx, {
+          type: 'bar',
+          data: {
+            labels: weeklyData.map(d => d.week),
+            datasets: [{
+              label: 'Amount Spent ($)',
+              data: weeklyData.map(d => d.amount),
+              backgroundColor: "#36A2EB"
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false }
+            },
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+
+    // Load on page start
+    window.onload = fetchExpenseData;
+  </script>
+
+</body>
+</html>
